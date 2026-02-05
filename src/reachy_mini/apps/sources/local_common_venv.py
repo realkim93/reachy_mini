@@ -643,6 +643,7 @@ async def install_package(
             python_path = _get_app_python(
                 app_name, wireless_version, desktop_app_daemon
             )
+            target_env = {}
 
             if use_uv:
                 install_cmd = [
@@ -653,10 +654,11 @@ async def install_package(
                     str(python_path),
                     target,
                 ]
+                target_env["UV_GIT_LFS"] = "1"
             else:
                 install_cmd = [str(python_path), "-m", "pip", "install", target]
 
-            ret = await running_command(install_cmd, logger=logger)
+            ret = await running_command(install_cmd, logger=logger, env=target_env)
 
             if ret != 0:
                 return ret
@@ -681,12 +683,14 @@ async def install_package(
                 shutil.rmtree(venv_path)
     else:
         # Original behavior: install into current environment
+        target_env = {}
         if use_uv:
+            target_env["UV_GIT_LFS"] = "1"
             install_cmd = ["uv", "pip", "install", "--python", sys.executable, target]
         else:
             install_cmd = [sys.executable, "-m", "pip", "install", target]
 
-        ret = await running_command(install_cmd, logger=logger)
+        ret = await running_command(install_cmd, logger=logger, env=target_env)
 
         if ret == 0 and app.extra:
             # Save app metadata so we can match by extra.id later
