@@ -30,12 +30,14 @@ async def update_reachy_mini(
         daemon_pkg = f"reachy_mini[wireless-version, gstreamer] @ {git_url}"
         apps_pkg = f"reachy-mini[gstreamer] @ {git_url}"
         extra_args = ["--force-reinstall"]
+        extra_env = ["UV_GIT_LFS=1"]
     else:
         # Install from PyPI
         logger.info("Installing from PyPI...")
         daemon_pkg = "reachy_mini[wireless-version, gstreamer]"
         apps_pkg = "reachy-mini[gstreamer]"
         extra_args = ["--pre"] if pre_release else []
+        extra_env = []
 
     # Update daemon venv
     logger.info("Updating daemon venv...")
@@ -50,7 +52,7 @@ async def update_reachy_mini(
         logger.info("Updating apps_venv SDK...")
 
         if shutil.which("uv"):
-            install_cmd = [
+            install_cmd = extra_env + [
                 "uv", "pip", "install", "--python", str(apps_venv_python),
                 "--upgrade", apps_pkg,
             ] + extra_args

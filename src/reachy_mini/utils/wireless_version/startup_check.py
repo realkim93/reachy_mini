@@ -329,14 +329,16 @@ def check_and_sync_apps_venv_sdk() -> None:
         git_url = f"git+https://github.com/pollen-robotics/reachy_mini.git@{daemon_info['git_ref']}"
         pkg = f"reachy-mini[gstreamer] @ {git_url}"
         extra = ["--force-reinstall"]
+        extra_env = ["UV_GIT_LFS=1"]
         print(f"Syncing apps_venv to git ref: {daemon_info['git_ref']}")
     else:
         pkg = f"reachy-mini[gstreamer]=={daemon_info['version']}"
         extra = []
+        extra_env = []
         print(f"Syncing apps_venv to version: {daemon_info['version']}")
 
     if use_uv:
-        cmd = ["uv", "pip", "install", "--python", str(apps_venv_python), pkg] + extra
+        cmd = extra_env + ["uv", "pip", "install", "--python", str(apps_venv_python), pkg] + extra
     else:
         cmd = [str(Path("/venvs/apps_venv/bin/pip")), "install", pkg] + extra
 
